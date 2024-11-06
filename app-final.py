@@ -7,6 +7,7 @@ from detectron2 import model_zoo
 import random
 import json
 import time
+import os
 
 app = Flask(__name__)
 
@@ -55,25 +56,19 @@ def dashboard():
 # Route to stream video with processed frames and sensor data
 @app.route('/video_feed')
 def video_feed():
-    # Path to the video (car driving at high speed)
-    video_path = 'stock.webm'  # Updated path to your video
-    video_capture = cv2.VideoCapture(video_path)
+    # Path to the directory containing the received images
+    image_directory = './'  # The directory where the received images are stored
     
-    # Set the desired FPS to 60
-    video_capture.set(cv2.CAP_PROP_FPS, 60)
+    # Get all the image files in the directory (ensure they are ordered correctly)
+    image_files = sorted([f for f in os.listdir(image_directory) if f.startswith('received_frame_') and f.endswith('.jpg')])
     
-    # Get the actual FPS of the video
-    actual_fps = video_capture.get(cv2.CAP_PROP_FPS)
-
     def generate_frames():
         prev_sensor_data = None
-        start_time = time.time()
         frame_count = 0
         
-        while True:
-            ret, frame = video_capture.read()
-            if not ret:
-                break
+        for image_file in image_files:
+            # Read the image from file
+            frame = cv2.imread(os.path.join(image_directory, image_file))
             
             # Process the frame
             restored_frame = process_frame(frame)
@@ -82,7 +77,6 @@ def video_feed():
             combined_frame = cv2.hconcat([frame, restored_frame])
             cv2.putText(combined_frame, "Original", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
             cv2.putText(combined_frame, "Restored", (frame.shape[1] + 10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            cv2.putText(combined_frame, f"FPS: {actual_fps:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
             
             # Encode the frame as JPEG
             _, buffer = cv2.imencode('.jpg', combined_frame)
@@ -98,16 +92,9 @@ def video_feed():
                    b'--frame\r\n'
                    b'Content-Type: application/json\r\n\r\n' + sensor_data_json.encode() + b'\r\n\r\n')
             
-            # Maintain the desired FPS of 60
-            frame_count += 1
-            elapsed_time = time.time() - start_time
-            if frame_count >= actual_fps:
-                time_to_sleep = 1.0 / 60.0 - elapsed_time / frame_count
-                if time_to_sleep > 0:
-                    time.sleep(time_to_sleep)
-                start_time = time.time()
-                frame_count = 0
-    
+            # Simulate a slight delay to mimic frame rate control (if needed)
+            time.sleep(1.0 / 60.0)  # Assuming 60 FPS
+
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Route to display sensor data (example)
@@ -118,3 +105,4 @@ def sensor_data_display():
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True)
+
