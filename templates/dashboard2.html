@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .video-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #video-feed {
+            border: 2px solid #333;
+            border-radius: 5px;
+            width: 800px;
+            height: 450px;
+        }
+        .sensor-container {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+        }
+        .sensor-box {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            width: 250px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .sensor-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .sensor-value {
+            font-size: 24px;
+        }
+    </style>
+    <script>
+        // Function to fetch and display sensor data
+        function fetchSensorData() {
+            fetch('/sensor_data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('light-value').textContent = data.light + " lx";
+                    document.getElementById('temperature-value').textContent = data.temperature + " °C";
+                    document.getElementById('humidity-value').textContent = data.humidity + " %";
+                })
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
+
+        // Refresh sensor data every 2 seconds
+        setInterval(fetchSensorData, 2000);
+    </script>
+</head>
+<body onload="fetchSensorData()">
+    <div class="container">
+        <h1>Object Detection Dashboard</h1>
+
+        <!-- Video Stream -->
+        <div class="video-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        </div>
+
+        <!-- Sensor Data -->
+        <div class="sensor-container">
+            <div class="sensor-box">
+                <div class="sensor-title">Light</div>
+                <div class="sensor-value" id="light-value">Loading...</div>
+            </div>
+            <div class="sensor-box">
+                <div class="sensor-title">Temperature</div>
+                <div class="sensor-value" id="temperature-value">Loading...</div>
+            </div>
+            <div class="sensor-box">
+                <div class="sensor-title">Humidity</div>
+                <div class="sensor-value" id="humidity-value">Loading...</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

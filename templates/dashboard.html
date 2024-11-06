@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection Dashboard</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Video Container Styling */
+        .video-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+        }
+        #video-feed {
+            border-radius: 8px;
+            border: 2px solid #444;
+            width: 800px;
+            height: 450px;
+        }
+
+        /* Sensor Container Styling */
+        .sensor-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            width: 800px;
+            margin-top: 20px;
+        }
+
+        /* Glassmorphism Style for Sensor Boxes */
+        .sensor-box {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sensor-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Analog Meter (Radial Progress Bar) */
+        .radial-progress {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #4caf50 0deg, 
+                #4caf50 calc(var(--progress) * 3.6deg), 
+                #333 calc(var(--progress) * 3.6deg), 
+                #333 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .radial-progress::after {
+            content: attr(data-value);
+            position: absolute;
+            color: #f4f4f4;
+        }
+        .radial-background {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #1e1e1e;
+            border-radius: 50%;
+        }
+
+        /* Styles for values inside meter */
+        .sensor-value {
+            font-size: 1.2em;
+            color: #f4f4f4;
+        }
+    </style>
+    <script>
+        // Function to fetch and update sensor data with a radial progress bar effect
+        function fetchSensorData() {
+            fetch('/sensor_data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('light-value').setAttribute("data-value", data.light + " lx");
+                    document.getElementById('temp-value').setAttribute("data-value", data.temperature + " °C");
+                    document.getElementById('humidity-value').setAttribute("data-value", data.humidity + " %");
+
+                    // Update progress percentage for each meter
+                    document.getElementById('light-value').style.setProperty('--progress', data.light / 100 * 100);
+                    document.getElementById('temp-value').style.setProperty('--progress', (data.temperature / 50) * 100);
+                    document.getElementById('humidity-value').style.setProperty('--progress', data.humidity);
+                })
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
+
+        // Refresh sensor data every 2 seconds
+        setInterval(fetchSensorData, 2000);
+    </script>
+</head>
+<body onload="fetchSensorData()">
+    <div class="container">
+        <h1>Object Detection Dashboard</h1>
+
+        <!-- Video Stream -->
+        <div class="video-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        </div>
+
+        <!-- Sensor Data with Analog Meters -->
+        <div class="sensor-container">
+            <!-- Light Sensor -->
+            <div class="sensor-box">
+                <div class="sensor-title">Light</div>
+                <div class="radial-progress" id="light-value" data-value="Loading..." style="--progress: 0;">
+                    <div class="radial-background"></div>
+                </div>
+            </div>
+
+            <!-- Temperature Sensor -->
+            <div class="sensor-box">
+                <div class="sensor-title">Temperature</div>
+                <div class="radial-progress" id="temp-value" data-value="Loading..." style="--progress: 0;">
+                    <div class="radial-background"></div>
+                </div>
+            </div>
+
+            <!-- Humidity Sensor -->
+            <div class="sensor-box">
+                <div class="sensor-title">Humidity</div>
+                <div class="radial-progress" id="humidity-value" data-value="Loading..." style="--progress: 0;">
+                    <div class="radial-background"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
