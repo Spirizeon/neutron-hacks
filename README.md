@@ -1,5 +1,5 @@
-# README
-
+# Neutron
+![Team](https://github.com/user-attachments/assets/2c0193e3-3796-40c9-a32b-f0dc588d9f01)
 ## Overview
 This project uses Detectron2 and Flask to serve a dashboard that streams a processed video feed along with simulated sensor data. It employs a Faster R-CNN model to detect objects in each frame of a video, highlights them with bounding boxes, and applies a simple "restoration" effect on the detected areas. The app runs a real-time dashboard that displays both the original and processed video frames along with simulated sensor readings for light, temperature, and humidity.
 
@@ -13,6 +13,7 @@ This project uses Detectron2 and Flask to serve a dashboard that streams a proce
 - **Device**: CPU (configurable to GPU if available)
 
 ## Features
+![image](https://github.com/user-attachments/assets/63308b27-5754-4801-be14-4001fbb193bd)
 - **Object Detection**: Uses Faster R-CNN to detect objects in the video feed.
 - **Frame Processing**: Frames are processed to include bounding boxes and enhanced contrast for detected areas.
 - **Sensor Data Simulation**: Light, temperature, and humidity data are simulated and displayed alongside the video stream.
@@ -66,3 +67,11 @@ For Detectron2, follow the [official installation instructions](https://detectro
 ## Notes
 - Ensure that your video file path is correct.
 - For faster processing, use a GPU-enabled environment if available by setting `cfg.MODEL.DEVICE` to `"cuda"`.
+
+
+
+
+
+
+
+
